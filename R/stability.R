@@ -68,8 +68,8 @@ findlam <- function(x, beta) {
 ##' @examples data(sampledata)
 ##' data(L0)
 ##' y <- sampledata$Y_Gau
-##' x <- sampledata[, -(1:3)]
-##' mod <- ss_glmaag(y, x, L0, nsam = 3)
+##' x <- sampledata[, 4:6]
+##' mod <- ss_glmaag(y, x, L0[seq_len(3), seq_len(3)], nsam = 3)
 ##' @export
 ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1, tune = F, est = T, lam1, lam2, w0 , adaptl1 = T, adaptl2 = T, pind, intercept = T, standardize = T, maxiter = 10000, cri = .001, fam = 'Gaussian', measdev = T, type1se = T, parallel = F) {
   p <- ncol(x)
@@ -155,7 +155,7 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
       sswhich <- replicate(nsam, sort(c(sample(obs, obsn), sample(cen, cenn))))
     }
   }
-  
+
   sswhich <- sswhich - 1
   if(standardize & intercept) {
     meanx <- colMeans(x)
@@ -170,16 +170,16 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
     sdx <- rep(1, p)
     xstd <- sweep(x, 2, sdx, '/')
   }
-  
-  
+
+
   names(xstd) <- NULL
-  
-  
+
+
   if(missing(pind)) {
     pind <- rep(1, p)
   }
-  
-  
+
+
   if (missing(lam1)) {
     if (fam == 'Gaussian'){
       if (all(pind == 1)) {
@@ -187,7 +187,7 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
       } else {
         lammax <- max(abs(residuals(lm(ycen ~ xstd[, -which(pind == 0)])) %*% xstd[, -which(pind == 0)])) / n
       }
-      
+
     } else if (fam == 'Logistic'){
       if (all(pind == 1)) {
         lammax <- max(abs(crossprod(xstd, y - my))) / n
@@ -206,7 +206,7 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
     } else {
       lam1 <- exp(seq(log(lammax), log(.0001*lammax), len = 100))
     }
-    
+
   }
   if (missing(lam2)) {
     lam2 <- c(.01*2^(7:0), 0)
@@ -216,7 +216,7 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
   } else {
     lam20 <- lam2
   }
-  
+
   if(missing(L)) {
     if (tune) {
       message('Cannot tune without an input network!')
@@ -262,9 +262,9 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
       }
     }
   }
-  
+
   tuneweight <- c(1, 0)
-  
+
   if (gototune) {
     modL <- switch (fam,
                     Gaussian = tune_network(ycen, xstd, L, L2, adaptl2 = adaptl2, nfolds = nfolds, intercept = F, standardize = F, fam = fam, type1se = type1se, measdev = measdev, maxiter = maxiter, cri = cri, parallel = parallel),
@@ -300,7 +300,7 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
           cvCoxnet2_pal(rep(0, p), xstd, xstd[cvwhich != i, ], xstd[cvwhich == i, ], y[cvwhich == i, 1], tie, ntie, tie1, tie2, tie3, tietr, ntietr, tie1tr, tie2tr, tie3tr, y[, 2], y[cvwhich != i, 2], y[cvwhich == i, 2], II, lam20, measdev, maxiter, cri)
         }
       }
-      
+
     } else {
       cvmod0 <- switch (fam,
                         Gaussian = cvlrnet2(nfolds, xstd, ycen, II, lam20, cvwhich, measdev),
@@ -308,9 +308,9 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
                         Cox = cvCoxnet2(nfolds, rep(0, p), xstd, y[, 1], tie, ntie, tie1, tie2, tie3, y[, 2], II, lam20, cvwhich, measdev, maxiter, cri)
       )
     }
-    
+
     cvmean0 <- rowMeans(cvmod0, na.rm = T)
-    
+
     if (type1se) {
       cvse0 <- apply(cvmod0, 1, sd, na.rm = T)/sqrt(nfolds)
       b <- as.vector(switch (fam,
@@ -325,12 +325,12 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
                              Cox = Coxnet(rep(0, p), xstd, tie, tie1, tie2, tie3, y[, 2], lam20[which.max(cvmean0)]*II, maxiter, cri)
       ))
     }
-    
+
     ss <- diag(sign(b))
     Lad <- ss %*% -abs(Lad) %*% ss
     L <- ss %*% L %*% ss
   }
-  
+
   if(adaptl1) {
     if (parallel) {
       cvmod0 <- foreach(i = 0:(nfolds - 1), .combine = 'cbind') %dopar% {
@@ -361,11 +361,11 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
         Cox = cvCoxnet2(nfolds, rep(0, p), xstd, y[, 1], tie, ntie, tie1, tie2, tie3, y[, 2], L, lam20, cvwhich, measdev, maxiter, cri)
       )
     }
-    
+
     cvmean0 <- rowMeans(cvmod0, na.rm = T)
     cvse0 <- apply(cvmod0, 1, sd, na.rm = T)/sqrt(nfolds)
-    
-    
+
+
     if (type1se) {
       b <- as.vector(switch (fam,
         Gaussian = lrnet(xstd, ycen, lam20[which(cvmean0 >= max(cvmean0, na.rm = T) - cvse0[which.max(cvmean0)])[1]]*L),
@@ -380,18 +380,18 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
       ))
     }
   }
-  
+
   if (adaptl1) {
     w <- (abs(b)^(-gam))*pind
   } else {
     w <- rep(1, p)*pind
   }
-  
+
   if (!missing(w0)) {
     w <- w0
   }
   lam1 <- lam1/min(w)
-  
+
   if (parallel) {
     outlist <- simplify2array(
       foreach(i = 1:nsam) %dopar% {
@@ -430,22 +430,22 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
                        Logistic = sslogiaagg(rep(0, p), xstd, y, Lad, dl, w, lam1, lam2, sswhich, intercept, maxiter, cri),
                        Cox = ssCoxaagg(ntie, rep(0, p), w, xstd, y[, 1], tie, tie1, tie2, tie3, y[, 2], Lad, dl, lam1, lam2, sswhich, maxiter, cri)
     )
-    
+
   }
-  
+
   out2 <- apply(outlist, 1:3, mean)
   ssmod <- 2 / p * apply(out2 * (1 - out2), 2:3, sum)
-  
-  
+
+
   ssmodbar <- apply(ssmod, 2, cummax)
-  
+
   ncut <- ssmodbar
   ncut[ncut > beta] <- NA
   lamloc <- which(ncut == max(ncut, na.rm = T), arr.ind = T)[1, ]
   lambda1final <- lam1[lamloc[1]]
   lambda2final <- lam2[lamloc[2]]
-  
-  
+
+
   if (fam == 'Gaussian') {
     coeffinal <- lraagg(rep(0, p), lambda1final, lambda2final, w, xstd, ycen, Lad, dl, maxiter, cri)
     b0_final <- my-sum(meanx/sdx*coeffinal)
@@ -479,8 +479,8 @@ ss_glmaag <- function(y, x, L, nfolds = 5, subn, nsam = 100, beta = .15, gam = 1
 ##' @examples data(sampledata)
 ##' data(L0)
 ##' y <- sampledata$Y_Gau
-##' x <- sampledata[, -(1:3)]
-##' mod <- ss_glmaag(y, x, L0, nsam = 3)
+##' x <- sampledata[, 4:6]
+##' mod <- ss_glmaag(y, x, L0[seq_len(3), seq_len(3)], nsam = 3)
 ##' cc <- coef(mod)
 ##' @export
 coef.ss_glmaag <- function(object, ...) {
@@ -502,8 +502,8 @@ coef.ss_glmaag <- function(object, ...) {
 ##' @examples data(sampledata)
 ##' data(L0)
 ##' y <- sampledata$Y_Gau
-##' x <- sampledata[, -(1:3)]
-##' mod <- ss_glmaag(y, x, L0, nsam = 3)
+##' x <- sampledata[, 4:6]
+##' mod <- ss_glmaag(y, x, L0[seq_len(3), seq_len(3)], nsam = 3)
 ##' pp <- predict(mod)
 ##' @export
 predict.ss_glmaag <- function(object, x, type = 'link', ...) {
@@ -535,8 +535,8 @@ predict.ss_glmaag <- function(object, x, type = 'link', ...) {
 ##' @examples data(sampledata)
 ##' data(L0)
 ##' y <- sampledata$Y_Gau
-##' x <- sampledata[, -(1:3)]
-##' mod <- ss_glmaag(y, x, L0, nsam = 3)
+##' x <- sampledata[, 4:6]
+##' mod <- ss_glmaag(y, x, L0[seq_len(3), seq_len(3)], nsam = 3)
 ##' gg <- plot(mod)
 ##' @export
 plot.ss_glmaag <- function(x, ...) {
@@ -557,8 +557,8 @@ plot.ss_glmaag <- function(x, ...) {
 ##' @examples data(sampledata)
 ##' data(L0)
 ##' y <- sampledata$Y_Gau
-##' x <- sampledata[, -(1:3)]
-##' mod <- ss_glmaag(y, x, L0, nsam = 3)
+##' x <- sampledata[, 4:6]
+##' mod <- ss_glmaag(y, x, L0[seq_len(3), seq_len(3)], nsam = 3)
 ##' print(mod)
 ##' @export
 print.ss_glmaag <- function(x, ...) {

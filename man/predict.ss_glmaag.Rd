@@ -25,7 +25,7 @@ Predict using the model tuned by stability selection
 data(sampledata)
 data(L0)
 y <- sampledata$Y_Gau
-x <- sampledata[, -(1:3)]
-mod <- ss_glmaag(y, x, L0, nsam = 3)
+x <- sampledata[, 4:6]
+mod <- ss_glmaag(y, x, L0[seq_len(3), seq_len(3)], nsam = 3)
 pp <- predict(mod)
 }

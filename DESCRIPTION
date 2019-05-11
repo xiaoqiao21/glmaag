@@ -1,7 +1,7 @@
 Package: glmaag
 Title: Adaptive LASSO and Network Regularized Generalized Linear Models
-Version: 0.0.5
-Date: 2019-04-26
+Version: 0.0.6
+Date: 2019-05-09
 Author: Kaiqiao Li [aut, cre],
   Pei Fen Kuan [aut],
   Xuefeng Wang [aut]

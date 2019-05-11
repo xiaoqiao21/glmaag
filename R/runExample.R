@@ -4,7 +4,7 @@
 ##' @importFrom shiny runApp
 ##' @examples runtheExample(FALSE)
 ##' @export
-runtheExample <- function(whetherrun) {
+runtheExample <- function(whetherrun = TRUE) {
   if (whetherrun) {
     appDir <- system.file("shiny_examples", "myapp.R", package = "glmaag")
     if (appDir == "") {

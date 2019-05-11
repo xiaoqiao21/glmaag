@@ -37,8 +37,8 @@ arma::cube cvCoxnet1(int nf, arma::vec b, arma::mat& x, arma::vec& y, bool tie, 
 	bool tietr;
 	int k1 = bets.n_elem, k2 = lam2.n_elem, n = y.n_elem, p = b.n_elem, ntie = tie1.n_elem, nutie = 0, ntr, nva, ntietr, j0, j2;
 	mat xtr, xva;
-	cube cvCox(k1, k2, nf);
-	uvec utie2, trind, vaind, subtie1, gettie, tie1tr0(n), tie2tr0(n), tie3tr0(n), tie1tr, tie2tr, tie3tr;
+	cube cvCox(k1, k2, nf, fill::zeros);
+	uvec utie2, trind, vaind, subtie1, gettie, tie1tr0(n, fill::zeros), tie2tr0(n, fill::zeros), tie3tr0(n, fill::zeros), tie1tr, tie2tr, tie3tr;
 	vec ytr, yva, deltr, delva, m0, ddtr, time, ytie;
 	vec::iterator bete = bets.end(), lame = lam2.end(), lampoint, betpoint;
 	cube::iterator cvCoxb = cvCox.begin();
@@ -108,7 +108,7 @@ arma::cube cvCoxnet1(int nf, arma::vec b, arma::mat& x, arma::vec& y, bool tie, 
 //[[Rcpp::export]]
 arma::mat cvCoxnet1_pal(arma::vec b, arma::mat x, arma::mat xtr, arma::mat xva, arma::vec yva, bool tie, arma::uvec tie1, arma::uvec tie2, arma::uvec tie3, bool tietr, arma::uvec tie1tr, arma::uvec tie2tr, arma::uvec tie3tr, arma::vec del, arma::vec deltr, arma::vec delva, arma::mat l1, arma::mat l2, arma::vec lam2, arma::vec bets, bool meas, int maxiter, double cri) {
 	int k1 = bets.n_elem, k2 = lam2.n_elem, n = x.n_rows, ntr = xtr.n_rows, nva = yva.n_elem, p = b.n_elem, ntie = tie1.n_elem, ntietr = tie1tr.n_elem;
-	mat cvCox(k1, k2);
+	mat cvCox(k1, k2, fill::zeros);
 	vec m0, ddtr, time;
 	vec::iterator lampoint = lam2.begin(), lame = lam2.end(), bete = bets.end(), betpoint;
 	mat::iterator cvb = cvCox.begin();
@@ -133,12 +133,12 @@ arma::mat cvCoxnet1_pal(arma::vec b, arma::mat x, arma::mat xtr, arma::mat xva, 
 //[[Rcpp::export]]
 arma::mat cvCoxnet2(int nf, arma::vec& b, arma::mat& x, arma::vec& y, bool tie, int ntie, arma::uvec& tie1, arma::uvec& tie2, arma::uvec& tie3, arma::vec& del, arma::mat& l, arma::vec& lam, arma::uvec& cvwhich, bool meas, int maxiter, double cri) {
 	int k = lam.n_elem, n = y.n_elem, p = b.n_elem, ntietr = 0, nutie = 0, ntr, nva, j0, j2;
-	mat cvCox(k, nf), xtr, xva;
+	mat cvCox(k, nf, fill::zeros), xtr, xva;
 	bool tietr;
 	vec ytr, yva, deltr, delva, m0, ddtr, ytie;
 	vec::iterator lame = lam.end(), lampoint;
 	mat::iterator cvpoint = cvCox.begin();
-	uvec utie2, trind, vaind, subtie1, gettie, tie1tr0(n), tie2tr0(n), tie3tr0(n), tie1tr, tie2tr, tie3tr;
+	uvec utie2, trind, vaind, subtie1, gettie, tie1tr0(n, fill::zeros), tie2tr0(n, fill::zeros), tie3tr0(n, fill::zeros), tie1tr, tie2tr, tie3tr;
 	if (tie) {
 		utie2 = unique(tie2);
 		nutie = utie2.n_elem;
@@ -199,7 +199,7 @@ arma::mat cvCoxnet2(int nf, arma::vec& b, arma::mat& x, arma::vec& y, bool tie, 
 //[[Rcpp::export]]
 arma::vec cvCoxnet2_pal(arma::vec& b, arma::mat& x, arma::mat& xtr, arma::mat& xva, arma::vec& yva, bool tie, int ntie, arma::uvec& tie1, arma::uvec& tie2, arma::uvec& tie3, bool tietr, int ntietr, arma::uvec& tie1tr, arma::uvec& tie2tr, arma::uvec& tie3tr, arma::vec& del, arma::vec& deltr, arma::vec& delva, arma::mat& l, arma::vec& lam, bool meas, int maxiter, double cri) {
 	int k = lam.n_elem, n = x.n_rows, ntr = xtr.n_rows, nva = yva.n_elem, p = b.n_elem;
-	vec cvCox(k), m0, ddtr;
+	vec cvCox(k, fill::zeros), m0, ddtr;
 	vec::iterator lamb = lam.begin(), cvpoint = cvCox.begin(), lame = lam.end();
 	if (tietr) {
 		ddtr = getdd(deltr, tie1tr, tie2tr, tie3tr);
@@ -219,10 +219,10 @@ arma::vec cvCoxnet2_pal(arma::vec& b, arma::mat& x, arma::mat& xtr, arma::mat& x
 List cvCoxaagg(int nf, int dfmax, int ntie, arma::vec& b, arma::vec& w, arma::mat& x, arma::vec& y, bool tie, arma::uvec& tie1, arma::uvec& tie2, arma::uvec& tie3, arma::vec& del, arma::mat& l, arma::vec& dl, arma::vec& lam1, arma::vec& lam2, arma::uvec& cvwhich, bool meas, int maxiter, double cri) {
 	bool tietr;
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, n = y.n_elem, p = b.n_elem, nutie = 0, ntr = 0, nva = 0, pv, ntietr, j0, j2;
-	uvec utie2, trind, vaind, vind, uind, vvind, subtie1, gettie, tie1tr0(n), tie2tr0(n), tie3tr0(n), tie1tr, tie2tr, tie3tr;
+	uvec utie2, trind, vaind, vind, uind, vvind, subtie1, gettie, tie1tr0(n, fill::zeros), tie2tr0(n, fill::zeros), tie3tr0(n, fill::zeros), tie1tr, tie2tr, tie3tr;
 	mat ll = l + diagmat(dl), xtr, xva;
-	vec ytr, yva, deltr, delva, lpie, apie, m0(p), m01(p), mmm, ddtr, time, ytie;
-	cube cvn = p*ones<cube>(k1, k2, nf), cvCox(k1, k2, nf);
+	vec ytr, yva, deltr, delva, lpie, apie, m0(p, fill::zeros), m01(p, fill::zeros), mmm, ddtr, time, ytie;
+	cube cvn = p*ones<cube>(k1, k2, nf), cvCox(k1, k2, nf, fill::zeros);
 	vec::iterator lam2point, lam1point;
 	if (tie) {
 		utie2 = unique(tie2);
@@ -357,10 +357,10 @@ List cvCoxaagg(int nf, int dfmax, int ntie, arma::vec& b, arma::vec& w, arma::ma
 arma::cube ssCoxaagg(int ntie, arma::vec& b, arma::vec& w, arma::mat& x, arma::vec& y, bool tie, arma::uvec& tie1, arma::uvec& tie2, arma::uvec& tie3, arma::vec& del, arma::mat& l, arma::vec& dl, arma::vec& lam1, arma::vec& lam2, arma::umat& sswhich, int maxiter, double cri) {
 	bool tietr;
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, n = y.n_elem, p = b.n_elem, nutie = 0, ntr = sswhich.n_rows, nsam = sswhich.n_cols, pv, ntietr, j0, j2, ntr2;
-	uvec utie2, vind, uind, vvind, subtie1, gettie, tie1tr0(n), tie2tr0(n), tie3tr0(n), tie1tr, tie2tr, tie3tr, ss0, ss2;
+	uvec utie2, vind, uind, vvind, subtie1, gettie, tie1tr0(n, fill::zeros), tie2tr0(n, fill::zeros), tie3tr0(n, fill::zeros), tie1tr, tie2tr, tie3tr, ss0, ss2;
 	mat ll = l + diagmat(dl), xtr;
-	vec ytr, deltr, lpie, apie, m0(p), m01(p), mmm, ddtr, time, ytie;
-	cube ssn = zeros<cube>(p, k1, k2);
+	vec ytr, deltr, lpie, apie, m0(p, fill::zeros), m01(p, fill::zeros), mmm, ddtr, time, ytie;
+	cube ssn(p, k1, k2, fill::zeros);
 	vec::iterator lam2point, lam1point;
 	if (tie) {
 		utie2 = unique(tie2);
@@ -489,8 +489,8 @@ arma::cube ssCoxaagg_pal(int ntietr, arma::vec b, arma::vec w, arma::mat xtr, bo
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, ntr = xtr.n_rows, p = b.n_elem, pv;
 	uvec vind, uind, vvind;
 	mat ll = l + diagmat(dl);
-	vec lpie, apie, m0(p), m01(p), mmm, ddtr, time;
-	cube ssn = zeros<cube>(p, k1, k2);
+	vec lpie, apie, m0(p, fill::zeros), m01(p, fill::zeros), mmm, ddtr, time;
+	cube ssn(p, k1, k2, fill::zeros);
 	vec::iterator lam2point = lam2.begin(), lam1point;
 	if (tietr) {
 		ddtr = getdd(deltr, tie1tr, tie2tr, tie3tr);
@@ -571,9 +571,9 @@ arma::cube ssCoxaagg_pal(int ntietr, arma::vec b, arma::vec w, arma::mat xtr, bo
 List Coxaagg_search(int ntie, int dfmax, arma::vec b, arma::vec w, arma::mat x, bool tie, arma::uvec tie1, arma::uvec tie2, arma::uvec tie3, arma::vec del, arma::mat l, arma::vec dl, arma::vec lam1, arma::vec lam2, int maxiter, double cri) {
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, n = x.n_rows, p = b.n_elem, pv;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), searchn = p*ones<mat>(k1, k2), searchlik(k1, k2);
-	vec lpie, apie, m0(p), m01(p), mmm, dd, time;
-	cube searchb = zeros<cube>(p, k1, k2);
+	mat ll = l + diagmat(dl), searchn = p*ones<mat>(k1, k2), searchlik(k1, k2, fill::zeros);
+	vec lpie, apie, m0(p, fill::zeros), m01(p, fill::zeros), mmm, dd, time;
+	cube searchb(p, k1, k2, fill::zeros);
 	List res;
 	vec::iterator lam2point = lam2.begin(), lam1point;
 	mat::col_iterator sb, sl;
@@ -670,8 +670,8 @@ List Coxaagg_search(int ntie, int dfmax, arma::vec b, arma::vec w, arma::mat x, 
 List Coxaagg_search_pal(int ntie, int dfmax, arma::vec b, arma::vec w, arma::mat x, bool tie, arma::uvec tie1, arma::uvec tie2, arma::uvec tie3, arma::vec del, arma::mat l, arma::vec dl, arma::vec lam1, double lam2, int maxiter, double cri) {
 	int k1 = lam1.n_elem, n = x.n_rows, p = b.n_elem, pv;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), searchb = zeros<mat>(p, k1);
-	vec searchn = p*ones<vec>(k1), searchlik(k1), lpie, apie, m0(p), m01(p), mmm, dd, time;
+	mat ll = l + diagmat(dl), searchb(p, k1, fill::zeros);
+	vec searchn = p*ones<vec>(k1), searchlik(k1, fill::zeros), lpie, apie, m0(p, fill::zeros), m01(p, fill::zeros), mmm, dd, time;
 	List res;
 	vec::iterator lam1point = lam1.begin(), sb = searchn.begin(), sl = searchlik.begin();
 	if (tie) {
@@ -762,8 +762,8 @@ List Coxaagg_search_pal(int ntie, int dfmax, arma::vec b, arma::vec w, arma::mat
 List cvCoxaagg_pal(int dfmax, int ntie, int ntietr, arma::vec b, arma::vec w, arma::mat x, arma::mat xtr, arma::mat xva, arma::vec yva, bool tie, arma::uvec tie1, arma::uvec tie2, arma::uvec tie3, bool tietr, arma::uvec tie1tr, arma::uvec tie2tr, arma::uvec tie3tr, arma::vec del, arma::vec deltr, arma::vec delva, arma::mat l, arma::vec dl, arma::vec lam1, arma::vec lam2, bool meas, int maxiter, double cri) {
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, n = x.n_rows, ntr = xtr.n_rows, nva = yva.n_elem, p = b.n_elem, pv;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), cvn = p*ones<mat>(k1, k2), cvCox(k1, k2);
-	vec lpie, apie, m0(p), m01(p), mmm, ddtr, time;
+	mat ll = l + diagmat(dl), cvn = p*ones<mat>(k1, k2), cvCox(k1, k2, fill::zeros);
+	vec lpie, apie, m0(p, fill::zeros), m01(p, fill::zeros), mmm, ddtr, time;
 	vec::iterator lam1e = lam1.end(), lam2point = lam2.begin(), lam1point;
 	mat::col_iterator cvnb, cvCoxb;
 	if (tietr) {

@@ -16,7 +16,7 @@ int tsign(double ti, int ci, double tj, int cj) {
 }
 
 vec invcumsum(int n, vec& x) {
-	vec cx(n);
+	vec cx(n, fill::zeros);
 	double init = 0;
 	vec::iterator x_begin = x.begin(), x_end = x.end(), cx_end = cx.end();
 	while (x_end != x_begin) {
@@ -207,7 +207,7 @@ double devianceCox(int n, vec score, bool tie, int ntie, uvec& tie1, uvec& tie2,
 
 vec Coxnet0(int n, int p, int ntie, vec b, mat& x, bool tie, uvec& tie1, uvec& tie2, vec& del, vec& dd, mat l, int maxiter, double cri) {
 	double loss0, loss1;
-	vec dl = l.diag(), zeta = zeros<vec>(n), eh, h00, h0, h, eta, eeta, delta;
+	vec dl = l.diag(), zeta(n, fill::zeros), eh, h00, h0, h, eta, eeta, delta;
 	mat nl = n*l, deye = eye<mat>(n, n), ddd, z, xdx;
 	bool ridge = all(findzerocol(l, p));
 	if (p > n) {
@@ -312,7 +312,7 @@ vec Coxaen(int n, int p, int ntie, vec b, double lam1, double lam2, vec w, mat x
 	double bq, loss0, loss1, softer0, softer1;
 	mat xsq2 = pow(x, 2);
 	vec lw = lam1*w, eta = x*b, eeta = exp(eta), ldl = lam2*dl, zz, ww, bx0, xsq, eh, h00, h0, h, h02, h2;
-	uvec actset = ones<uvec>(p);
+	uvec actset(p, fill::ones);
 	vec::iterator bpoint, lwpoint, ldlpoint;
 	uvec::iterator actpoint;
 	h00 = invcumsum(n, eeta);
@@ -396,7 +396,7 @@ vec Coxal(int n, int p, int ntie, vec b, double lam, vec w, mat x, bool tie, uve
 	double bq, loss0, loss1, softer0, softer1;
 	mat xsq2 = pow(x, 2);
 	vec lw = lam*w, eta = x*b, eeta = exp(eta), zz, ww, bx0, xsq, eh, h00, h0, h, h02, h2;
-	uvec actset = ones<uvec>(p);
+	uvec actset(p, fill::ones);
 	vec::iterator bpoint, lwpoint;
 	uvec::iterator actpoint;
 	h00 = invcumsum(n, eeta);
@@ -481,13 +481,13 @@ vec Coxaagg0(int n, int p, int ntie, vec b, double lam1, double lam2, vec w, mat
 		return Coxal(n, p, ntie, b, lam1, w, x, tie, tie1, tie2, del, dd, maxiter, cri);
 	}
 	int p1, p2, act0 = p, act1;
-	uvec uncorp = findzerocol(l, p), zelm, nonzelm, actset = ones<uvec>(p);
+	uvec uncorp = findzerocol(l, p), zelm, nonzelm, actset(p, fill::ones);
 	if (all(uncorp)) {
 		return Coxaen(n, p, ntie, b, lam1, lam2, w, x, tie, tie1, tie2, del, dd, dl, maxiter, cri);
 	}
 	double bq, loss0, loss1, softer0, softer1;
-	mat ll, lll, xsq2, x2(n, p);
-	vec eta = x*b, eeta = exp(eta), ldl(p), zz, ww, bx0, xsq, eh, h00, h0, h, h02, h2, b2(p), lw(p);
+	mat ll, lll, xsq2, x2(n, p, fill::zeros);
+	vec eta = x*b, eeta = exp(eta), ldl(p), zz, ww, bx0, xsq, eh, h00, h0, h, h02, h2, b2(p, fill::zeros), lw(p, fill::zeros);
 	vec::iterator bpoint, lwpoint, ldlpoint;
 	uvec::iterator actpoint;
 	bool anonze = any(uncorp);

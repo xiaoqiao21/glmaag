@@ -16,7 +16,7 @@ int getsign(double x) {
 }
 
 uvec findzerocol(mat l, int p) {
-	uvec zerc(p);
+	uvec zerc(p, fill::zeros);
 	uvec::iterator zp = zerc.begin();
 	for (int i = 0; i < p; ++i) {
 		l(i, i) = 0;

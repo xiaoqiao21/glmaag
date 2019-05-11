@@ -11,7 +11,7 @@ vec lraen(vec b, double lam1, double lam2, const vec& w, const mat& x, const vec
 	int p = b.n_elem, n = y.n_elem, act0 = p, act1;
 	double bt, loss0, loss1, softer0, softer1;
 	vec rr, lw = lam1*w, xsq = trans(mean(pow(x, 2))), la1 = xsq + lam2*dl, la12 = lam2*dl;
-	uvec actset = ones<uvec>(p);
+	uvec actset(p, fill::ones);
 	vec::iterator bpoint, xsqpoint, lapoint, lwpoint;
 	uvec::iterator actpoint;
 	rr = y - x*b;
@@ -61,7 +61,7 @@ vec lral(vec b, double lam1, const vec& w, const mat& x, const vec& y, int maxit
 	int p = b.n_elem, n = y.n_elem, act0 = p, act1;
 	double bt, loss0, loss1, softer0, softer1;
 	vec rr, lw = lam1*w, xsq = trans(mean(pow(x, 2)));
-	uvec actset = ones<uvec>(p);
+	uvec actset(p, fill::ones);
 	vec::iterator bpoint, xsqpoint, lwpoint;
 	uvec::iterator actpoint;
 	rr = y - x*b;

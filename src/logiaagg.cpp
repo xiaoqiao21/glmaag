@@ -7,7 +7,7 @@ using namespace Rcpp;
 //[[Rcpp::export]]
 arma::vec loginet(double b0, arma::vec b, arma::mat x, const arma::vec& y, arma::mat l, bool intercept, int maxiter, double cri) {
 	int n = y.n_elem, p = b.n_elem;
-	vec zeta = zeros<vec>(n), bx = b0 + x*b, ww, pp, dl, tmpone;
+	vec zeta(n, fill::zeros), bx = b0 + x*b, ww, pp, dl, tmpone;
 	double loss0, loss1;
 	uvec uncorp = findzerocol(l, p), tmp1;
 	bool ridge = all(uncorp);
@@ -119,9 +119,9 @@ arma::vec logiaagg(double b0, arma::vec b, double lam1, double lam2, const arma:
 	}
 	double del, b00, bq, loss0, loss1, softer0, softer1;
 	mat ll, lll, x2(n, p), xsq2;
-	vec lw(p), ww, pp, bx = b0 + x*b, ldl(p), b2(p), tmpone;
+	vec lw(p, fill::zeros), ww, pp, bx = b0 + x*b, ldl(p, fill::zeros), b2(p, fill::zeros), tmpone;
 	bool anonze = any(uncorp);
-	uvec actset = ones<uvec>(p), tmp1;
+	uvec actset(p, fill::ones), tmp1;
 	vec::iterator bpoint, lwpoint, ldlpoint;
 	uvec::iterator actpoint;
 	pp = 1 / (1 + exp(-bx));
@@ -283,7 +283,7 @@ List cvlogiaagg(int nf, int dfmax, arma::vec b, const arma::mat& x, const arma::
 	uvec trind, vaind, vind, uind, vvind;
 	mat xtr, xva, ll = l + diagmat(dl);
 	vec ytr, yva, score, lpie, apie, m0, m01, mmm;
-	cube cvn = p*ones<cube>(k1, k2, nf), cvlogi(k1, k2, nf);
+	cube cvn = p*ones<cube>(k1, k2, nf), cvlogi(k1, k2, nf, fill::zeros);
 	vec::iterator lam2point, lam1point;
 	for (int i = 0; i < nf; ++i) {
 		trind = find(cvwhich != i);
@@ -392,7 +392,7 @@ arma::cube sslogiaagg(arma::vec b, const arma::mat& x, const arma::vec& y, const
 	uvec vind, uind, vvind;
 	mat xtr, ll = l + diagmat(dl);
 	vec ytr, lpie, apie, m0, m01, mmm;
-	cube ssn = zeros<cube>(p, k1, k2);
+	cube ssn(p, k1, k2, fill::zeros);
 	vec::iterator lam1point, lam2point;
 	for (int i = 0; i < nsam; ++i) {
 		xtr = x.rows(sswhich.col(i));
@@ -484,7 +484,7 @@ arma::cube sslogiaagg_pal(arma::vec b, arma::mat xtr, arma::vec ytr, arma::mat l
 	uvec vind, uind, vvind;
 	mat ll = l + diagmat(dl), dbhat;
 	vec lpie, apie, m0, m01, mmm;
-	cube ssn = zeros<cube>(p, k1, k2);
+	cube ssn(p, k1, k2, fill::zeros);
 	vec::iterator lam2point = lam2.begin(), lam1point;
 	for (int j = 0; j < k2; ++j) {
 		lam1point = lam1.begin();
@@ -567,9 +567,9 @@ List logiaagg_search(int dfmax, arma::vec b, const arma::mat& x, const arma::vec
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, p = b.n_elem, n = x.n_rows;
 	double b0 = intercept ? logi1(mean(y)) : 0, m0i, m01i;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), searchn = p*ones<mat>(k1, k2), searchlik(k1, k2), searchint(k1, k2);
+	mat ll = l + diagmat(dl), searchn = p*ones<mat>(k1, k2), searchlik(k1, k2, fill::zeros), searchint(k1, k2, fill::zeros);
 	vec lpie, apie, m0, m01, mmm, score;
-	cube searchb = zeros<cube>(p, k1, k2);
+	cube searchb(p, k1, k2, fill::zeros);
 	List res;
 	mat::col_iterator sb, sl, si;
 	vec::iterator lam2point = lam2.begin(), lam1point;
@@ -675,7 +675,7 @@ List logiaagg_search_pal(int dfmax, arma::vec b, const arma::mat& x, const arma:
 	double b0 = intercept ? logi1(mean(y)) : 0, m0i, m01i;
 	uvec vind, uind, vvind;
 	mat ll = l + diagmat(dl), searchb = zeros<mat>(p, k1);
-	vec searchn = p*ones<vec>(k1), searchlik(k1), searchint(k1), lpie, apie, m0, m01, mmm, score;
+	vec searchn = p*ones<vec>(k1), searchlik(k1, fill::zeros), searchint(k1, fill::zeros), lpie, apie, m0, m01, mmm, score;
 	List res;
 	vec::iterator lam1point = lam1.begin(), sb = searchn.begin(), sl = searchlik.begin(), si = searchint.begin();
 	mmm = logiaagg(b0, b, *lam1point, lam2, w, x, y, l, dl, intercept, maxiter, cri);
@@ -773,7 +773,7 @@ List cvlogiaagg_pal(int dfmax, arma::vec b, arma::mat xtr, arma::mat xva, arma::
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, p = xtr.n_cols, ntr = ytr.n_elem, nva = yva.n_elem;
 	double b0, m0i, m01i;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), cvn = p*ones<mat>(k1, k2), cvlogi(k1, k2);
+	mat ll = l + diagmat(dl), cvn = p*ones<mat>(k1, k2), cvlogi(k1, k2, fill::zeros);
 	vec score, lpie, apie, m0, m01, mmm;
 	b0 = intercept ? logi1(mean(ytr)) : 0;
 	vec::iterator lam1e = lam1.end(), lam2point = lam2.begin(), lam1point;
@@ -874,7 +874,7 @@ arma::cube cvloginet1(int nf, const arma::mat& x, const arma::vec& y, const arma
 	int k1 = bets.n_elem, k2 = lam2.n_elem, p = x.n_cols, nva;
 	double b0;
 	mat xtr, xva;
-	cube cvlogi(k1, k2, nf);
+	cube cvlogi(k1, k2, nf, fill::zeros);
 	uvec trind, vaind;
 	vec score, ytr, yva, m0;
 	vec::iterator bete = bets.end(), lame = lam2.end(), betpoint, lampoint;
@@ -907,7 +907,7 @@ arma::cube cvloginet1(int nf, const arma::mat& x, const arma::vec& y, const arma
 arma::mat cvloginet1_pal(arma::mat xtr, arma::mat xva, arma::vec ytr, arma::vec yva, arma::vec b, arma::mat l1, arma::mat l2, arma::vec lam2, arma::vec bets, bool intercept, bool meas, int maxiter, double cri) {
 	int k1 = bets.n_elem, k2 = lam2.n_elem, p = xtr.n_cols, nva = yva.n_elem;
 	double b0;
-	mat cvlogi(k1, k2);
+	mat cvlogi(k1, k2, fill::zeros);
 	vec score, m0;
 	vec::iterator lampoint = lam2.begin(), lame = lam2.end(), bete = bets.end(), betpoint;
 	mat::iterator cvb = cvlogi.begin();
@@ -930,7 +930,7 @@ arma::mat cvloginet1_pal(arma::mat xtr, arma::mat xva, arma::vec ytr, arma::vec 
 arma::mat cvloginet2(int nf, const arma::mat& x, const arma::vec& y, const arma::vec& b, const arma::mat& l, arma::vec& lam2, bool intercept, const arma::uvec& cvwhich, bool meas, int maxiter, double cri) {
 	int k = lam2.n_elem, p = x.n_cols, nva;
 	double b0;
-	mat cvlogi(k, nf), xtr, xva;
+	mat cvlogi(k, nf, fill::zeros), xtr, xva;
 	uvec trind, vaind;
 	vec score, ytr, yva, m0;
 	vec::iterator lame = lam2.end(), lampoint;
@@ -958,7 +958,7 @@ arma::mat cvloginet2(int nf, const arma::mat& x, const arma::vec& y, const arma:
 arma::vec cvloginet2_pal(arma::mat xtr, arma::mat xva, arma::vec ytr, arma::vec yva, arma::vec b, arma::mat l, arma::vec lam2, bool intercept, bool meas, int maxiter, double cri) {
 	int k = lam2.n_elem, p = xtr.n_cols, nva = yva.n_elem;
 	double b0;
-	vec cvlogi(k), score, m0;
+	vec cvlogi(k, fill::zeros), score, m0;
 	b0 = intercept ? logi1(mean(ytr)) : 0;
 	vec::iterator lamb = lam2.begin(), cvpoint = cvlogi.begin(), lame = lam2.end();
 	while (lamb != lame) {

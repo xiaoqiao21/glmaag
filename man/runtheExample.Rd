@@ -4,7 +4,7 @@
 \alias{runtheExample}
 \title{Shiny app}
 \usage{
-runtheExample(whetherrun)
+runtheExample(whetherrun = TRUE)
 }
 \arguments{
 \item{whetherrun}{whether to run shiny app, default to be TRUE}

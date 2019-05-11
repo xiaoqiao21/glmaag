@@ -33,7 +33,7 @@ vec logiaen(double b0, vec b, double lam1, double lam2, const vec& w, const mat&
 	double del, b00, bq, loss0, loss1, softer0, softer1;
 	vec lw = lam1*w, ww, pp, bx = b0 + x*b, ldl = lam2*dl, tmpone;
 	mat xsq2 = pow(x, 2);
-	uvec actset = ones<uvec>(p), tmp1;
+	uvec actset(p, fill::ones), tmp1;
 	pp = 1 / (1 + exp(-bx));
 	ww = pp % (1 - pp);
 	loss0 = mean(ww % pow(((y - pp) / ww), 2)) + dot(lw, abs(b)) + dot(b, ldl % b);

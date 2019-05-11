@@ -25,10 +25,10 @@ arma::vec lraagg(arma::vec b, double lam1, double lam2, const arma::vec& w, cons
 		return lraen(b, lam1, lam2, w, x, y, dl, maxiter, cri);
 	}
 	double bq, loss0, loss1, softer0, softer1;
-	mat ll, lll, x2(n, p);
-	vec rr = y - x*b, lw(p), la(p), b2(p), ldl, xsq(p);
+	mat ll, lll, x2(n, p, fill::zeros);
+	vec rr = y - x*b, lw(p, fill::zeros), la(p, fill::zeros), b2(p, fill::zeros), ldl, xsq(p, fill::zeros);
 	bool anonze = any(uncorp);
-	uvec actset = ones<uvec>(p);
+	uvec actset(p, fill::ones);
 	vec::iterator bpoint, xsqpoint, lwpoint, lapoint;
 	uvec::iterator actpoint;
 	if (anonze) {
@@ -143,7 +143,7 @@ arma::vec lraagg(arma::vec b, double lam1, double lam2, const arma::vec& w, cons
 arma::cube cvlrnet1(int nf, const arma::mat& x, const arma::vec& y, const arma::mat& l1, const arma::mat& l2, arma::vec& lam2, arma::vec& bets, const arma::uvec& cvwhich, bool meas) {
 	int k1 = bets.n_elem, k2 = lam2.n_elem, ntr;
 	mat xtr, xva;
-	cube cvlr(k1, k2, nf);
+	cube cvlr(k1, k2, nf, fill::zeros);
 	uvec trind, vaind;
 	vec m0, ytr, yva;
 	vec::iterator bete = bets.end(), lame = lam2.end(), lampoint, betpoint;
@@ -173,7 +173,7 @@ arma::cube cvlrnet1(int nf, const arma::mat& x, const arma::vec& y, const arma::
 //[[Rcpp::export]]
 arma::mat cvlrnet1_pal(arma::mat xtr, arma::mat xva, arma::vec ytr, arma::vec yva, arma::mat l1, arma::mat l2, arma::vec lam2, arma::vec bets, bool meas) {
 	int k1 = bets.n_elem, k2 = lam2.n_elem, ntr = ytr.n_elem;
-	mat cvlr(k1, k2);
+	mat cvlr(k1, k2, fill::zeros);
 	vec m0;
 	vec::iterator lampoint = lam2.begin(), lame = lam2.end(), bete = bets.end(), betpoint;
 	mat::iterator cvb = cvlr.begin();
@@ -192,7 +192,7 @@ arma::mat cvlrnet1_pal(arma::mat xtr, arma::mat xva, arma::vec ytr, arma::vec yv
 //[[Rcpp::export]]
 arma::mat cvlrnet2(int nf, const arma::mat& x, const arma::vec& y, const arma::mat& l, arma::vec& lam2, const arma::uvec& cvwhich, bool meas) {
 	int k = lam2.n_elem, ntr;
-	mat cvlr(k, nf), xtr, xva;
+	mat cvlr(k, nf, fill::zeros), xtr, xva;
 	uvec trind, vaind;
 	vec m0, ytr, yva;
 	vec::iterator lame = lam2.end(), lampoint;
@@ -217,7 +217,7 @@ arma::mat cvlrnet2(int nf, const arma::mat& x, const arma::vec& y, const arma::m
 //[[Rcpp::export]]
 arma::vec cvlrnet2_pal(arma::mat xtr, arma::mat xva, arma::vec ytr, arma::vec yva, arma::mat l, arma::vec lam2, bool meas) {
 	int k = lam2.n_elem, ntr = ytr.n_elem;
-	vec cvlr(k);
+	vec cvlr(k, fill::zeros);
 	vec m0;
 	vec::iterator lambegin = lam2.begin(), cvpoint = cvlr.begin(), lamend = lam2.end();
 	while (lambegin != lamend) {
@@ -233,7 +233,7 @@ List cvlraagg(int nf, int dfmax, const arma::vec& b, const arma::vec& w, const a
 	uvec trind, vaind, vind, uind, vvind;
 	mat xtr, xva, ll = l + diagmat(dl);
 	vec ytr, yva, lpie, apie, m0, m01, mmm;
-	cube cvn = p*ones<cube>(k1, k2, nf), cvlr(k1, k2, nf);
+	cube cvn = p*ones<cube>(k1, k2, nf), cvlr(k1, k2, nf, fill::zeros);
 	vec::iterator lam2point, lam1point;
 	for (int i = 0; i < nf; ++i) {
 		trind = find(cvwhich != i);
@@ -326,7 +326,7 @@ List cvlraagg(int nf, int dfmax, const arma::vec& b, const arma::vec& w, const a
 List cvlraagg_pal(int dfmax, arma::vec b, arma::vec w, arma::mat xtr, arma::mat xva, arma::vec ytr, arma::vec yva, arma::mat l, arma::vec dl, arma::vec lam1, arma::vec lam2, bool meas, int maxiter, double cri) {
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, p = b.n_elem, ntr = ytr.n_elem;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), cvn = p*ones<mat>(k1, k2), cvlr(k1, k2);
+	mat ll = l + diagmat(dl), cvn = p*ones<mat>(k1, k2), cvlr(k1, k2, fill::zeros);
 	vec lpie, apie, m0, m01, mmm;
 	vec::iterator lam1e = lam1.end(), lam2point = lam2.begin(), lam1point;
 	mat::col_iterator cvnb, cvlrb;
@@ -415,7 +415,7 @@ arma::cube sslraagg(const arma::vec& b, const arma::vec& w, const arma::mat& x, 
 	uvec vind, uind, vvind;
 	mat xtr, ll = l + diagmat(dl);
 	vec ytr, lpie, apie, m0, m01, mmm;
-	cube ssn = zeros<cube>(p, k1, k2);
+	cube ssn(p, k1, k2, fill::zeros);
 	vec::iterator lam1point, lam2point;
 	for (int i = 0; i < nsam; ++i) {
 		xtr = x.rows(sswhich.col(i));
@@ -494,7 +494,7 @@ arma::cube sslraagg_pal(arma::vec b, arma::vec w, arma::mat xtr, arma::vec ytr, 
 	uvec vind, uind, vvind;
 	mat ll = l + diagmat(dl), dbhat;
 	vec lpie, apie, m0, m01, mmm;
-	cube ssn = zeros<cube>(p, k1, k2);
+	cube ssn(p, k1, k2, fill::zeros);
 	vec::iterator lam2point = lam2.begin(), lam1point;
 	for (int j = 0; j < k2; ++j) {
 		lam1point = lam1.begin();
@@ -566,9 +566,9 @@ arma::cube sslraagg_pal(arma::vec b, arma::vec w, arma::mat xtr, arma::vec ytr, 
 List lraagg_search(int dfmax, arma::vec b, const arma::vec& w, const arma::mat& x, const arma::vec& y, const arma::mat& l, const arma::vec& dl, arma::vec& lam1, arma::vec& lam2, int maxiter, double cri) {
 	int k1 = lam1.n_elem, k2 = lam2.n_elem, p = b.n_elem, n = x.n_rows;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), searchn = p*ones<mat>(k1, k2), searchlik(k1, k2);
+	mat ll = l + diagmat(dl), searchn = p*ones<mat>(k1, k2), searchlik(k1, k2, fill::zeros);
 	vec lpie, apie, m0, m01, mmm;
-	cube searchb = zeros<cube>(p, k1, k2);
+	cube searchb(p, k1, k2, fill::zeros);
 	List res;
 	vec::iterator lam2point = lam2.begin(), lam1point;
 	mat::col_iterator sb, sl;
@@ -660,8 +660,8 @@ List lraagg_search(int dfmax, arma::vec b, const arma::vec& w, const arma::mat& 
 List lraagg_search_pal(int dfmax, arma::vec b, arma::vec w, arma::mat x, arma::vec y, arma::mat l, arma::vec dl, arma::vec lam1, double lam2, int maxiter, double cri) {
 	int k1 = lam1.n_elem, p = b.n_elem, n = x.n_rows;
 	uvec vind, uind, vvind;
-	mat ll = l + diagmat(dl), searchb = zeros<mat>(p, k1);
-	vec searchn = p*ones<vec>(k1), searchlik(k1), lpie, apie, m0, m01, mmm;
+	mat ll = l + diagmat(dl), searchb(p, k1, fill::zeros);
+	vec searchn = p*ones<vec>(k1), searchlik(k1, fill::zeros), lpie, apie, m0, m01, mmm;
 	List res;
 	vec::iterator lam1point = lam1.begin(), sb = searchn.begin(), sl = searchlik.begin();
 	m0 = lraagg(b, *lam1point, lam2, w, x, y, l, dl, maxiter, cri);
